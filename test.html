@@ -15,10 +15,12 @@
 </div>
 
 <script>
+
+    window.localStorage.setItem('mygame', 'memory-game');
     const emojis = ['🦊', '🦊', '🐰', '🐰', '🐶', '🐶', '🐸', '🐸', '🐯', '🐯', '🐹', '🐹'];
     let startTime, timer;
-    let totalElapsedTime = localStorage.getItem('totalElapsedTime') ? parseInt(localStorage.getItem('totalElapsedTime')) : 0;
-    let currentLevel = localStorage.getItem('currentLevel') ? parseInt(localStorage.getItem('currentLevel')) : 1;
+    let totalElapsedTime = window.localStorage.getItem('totalElapsedTime') ? parseInt(window.localStorage.getItem('totalElapsedTime')) : 0;
+    let currentLevel = window.localStorage.getItem('currentLevel') ? parseInt(window.localStorage.getItem('currentLevel')) : 1;
 
     function startTimer(duration, display) {
         startTime = Date.now();
@@ -80,7 +82,7 @@
                                 clearInterval(timer);
                                 const elapsedTime = Math.round((Date.now() - startTime) / 1000);
                                 totalElapsedTime += elapsedTime;
-                                localStorage.setItem('totalElapsedTime', totalElapsedTime);
+                                window.localStorage.setItem('totalElapsedTime', totalElapsedTime);
 
                                 if (currentLevel < 3) {
                                     swal({
@@ -94,7 +96,7 @@
                                     }).then((willIncreaseLevel) => {
                                         if (willIncreaseLevel) {
                                             currentLevel++;
-                                            localStorage.setItem('currentLevel', currentLevel);
+                                            window.localStorage.setItem('currentLevel', currentLevel);
                                             initializeGame();
                                         } else {
                                             swal("Total time: " + totalElapsedTime + " seconds");
@@ -102,7 +104,6 @@
                                         }
                                     });
                                 } else {
-                                    localStorage.setItem('totalElapsedTime', totalElapsedTime);
 
                                     swal({
                                         title: "You win!",
@@ -134,8 +135,8 @@
     function resetGame() {
         currentLevel = 1;
         totalElapsedTime = 0;
-        localStorage.removeItem('totalElapsedTime');
-        localStorage.removeItem('currentLevel');
+        window.localStorage.removeItem('totalElapsedTime');
+        window.localStorage.removeItem('currentLevel');
         initializeGame();
     }
 
