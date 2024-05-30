@@ -3,25 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Memory Game</title>
+    <link rel="stylesheet" href="level3.css">
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <link rel="stylesheet" href="level2.css">
 
 
 </head>
 <body>
 <div class="container">
     <h2>Memory Game</h2>
-    <div id="time">00:30</div>
+    <div id="time">01:00</div>
     <div class="game"></div>
     <button class="reset" onclick="window.location.reload();">Reset game</button>
 </div>
 
 <script>
-    const emojis = ['🦊', '🦊', '🐰', '🐰', '🐶', '🐶', '🐸', '🐸', '🐯', '🐯', '🐹', '🐹'];
-    let starTime, timer;
+    const emojis = ['🦊', '🦊', '🐶', '🐶', '🐰', '🐰', '🐸', '🐸', '🐵', '🐵', '🐯', '🐯', '🐷', '🐷', '🐹', '🐹'];
 
     function startTimer(duration, display) {
-        starTime = Date.now();
         let timer = duration, minutes, seconds;
         const interval = setInterval(function () {
             minutes = parseInt(timer / 60, 10);
@@ -39,7 +37,7 @@
                     text: "Game over.",
                     icon: "error",
                     buttons: false,
-                    timer: 2000
+                    timer: 2000 // Automatically close after 2 seconds
                 }).then(() => {
                     window.location.reload();
                 });
@@ -49,20 +47,20 @@
     }
 
     function initializeGame() {
-        const shuffledEmojis = emojis.sort(() => (Math.random() > 0.5) ? 1 : -1);
+        const shur_emojis = emojis.sort(() => (Math.random() > 0.5) ? 2 : -1);
         const gameContainer = document.querySelector('.game');
         gameContainer.innerHTML = '';
 
-        for (let i = 0; i < shuffledEmojis.length; i++) {
+        for (let i = 0; i < shur_emojis.length; i++) {
             let box = document.createElement('div');
             box.className = 'item';
-            box.innerHTML = shuffledEmojis[i];
+            box.innerHTML = shur_emojis[i];
 
             box.onclick = function () {
                 this.classList.add('boxOpen');
                 setTimeout(function () {
                     const openBoxes = document.querySelectorAll('.boxOpen');
-                    if (openBoxes.length === 2) {
+                    if (openBoxes.length > 1) {
                         if (openBoxes[0].innerHTML === openBoxes[1].innerHTML) {
                             openBoxes[0].classList.add('boxMatch');
                             openBoxes[1].classList.add('boxMatch');
@@ -70,25 +68,9 @@
                             openBoxes[0].classList.remove('boxOpen');
                             openBoxes[1].classList.remove('boxOpen');
 
-                            if (document.querySelectorAll('.boxMatch').length === shuffledEmojis.length) {
+                            if (document.querySelectorAll('.boxMatch').length === shur_emojis.length) {
                                 clearInterval(timer);
-                                const elapsedTime = Math.round((Date.now() - starTime) / 1000);
-                                swal({
-                                    title: "You win!",
-                                    text: `You completed the game in ${elapsedTime} second. Do you want to increase the level up?`,
-                                    icon: "success",
-                                    buttons: {
-                                        cancel: "No",
-                                        confirm: "Yes",
-                                    },
-                                })
-                                    .then((willIncreaseLevel) => {
-                                        if (willIncreaseLevel) {
-                                            window.location.href = 'level3.html';
-                                        } else {
-                                            swal("You win!!");
-                                        }
-                                    });
+                                swal("You win!!!")
                             }
                         } else {
                             openBoxes[0].classList.remove('boxOpen');
@@ -100,11 +82,12 @@
             gameContainer.appendChild(box);
         }
 
-        const thirtySeconds = 30,
+        const thirtySeconds = 60 * 1,
             display = document.querySelector('#time');
         timer = startTimer(thirtySeconds, display);
     }
 
+    let timer;
     initializeGame();
 </script>
 </body>

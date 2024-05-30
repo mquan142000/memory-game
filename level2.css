@@ -14,7 +14,6 @@ body {
     background-size: 100%;
     background-repeat: no-repeat;
 }
-
 .container {
     position: relative;
     display: flex;
@@ -51,7 +50,7 @@ h2 {
     background: #267c65;
 }
 
-#time {
+#time{
     color: #fff;
     font-size: 1.5em;
     text-transform: uppercase;
@@ -63,10 +62,9 @@ h2 {
     height: 430px;
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
     transform-style: preserve-3d;
     perspective: 500px;
-    margin-left: 100px;
 }
 
 .item {
