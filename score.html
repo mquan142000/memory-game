@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Save Score</title>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <style>
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        body{
+            align-items: center;
+            background-image: url("1.jpg");
+            background-size: 100%;
+        }
+        h2 {
+            font-size: 3em;
+            color: #FFD700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-shadow: 5px 5px 10px #267c65;
+            font-family: Helvetica;
+        }
+        label {
+            color: #FFD700;
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 5px 5px 10px #267c65;
+            font-family: Helvetica;
+
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .clear-button {
+            background-color: #28a745;
+            margin-top: 20px;
+        }
+        .clear-button:hover {
+            background-color: #28a745;
+        }
+        .time-display {
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            color: #FFD700;
+            background-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Score</h2>
+    <div class="time-display" id="timeDisplay"></div>
+    <form id="saveScoreForm">
+        <label for="playerName">NAME</label>
+        <input type="text" id="playerName" name="playerName" required>
+        <button type="submit">Save Score</button>
+    </form>
+    <table id="scoreTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Time (seconds)</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <button class="clear-button" id="clearStorageButton">Clear All Scores</button>
+    <div id="totalScoreDisplay"></div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        displayTotalElapsedTime();
+        displayScores();
+        displayTotalScore();
+    });
+
+    function displayTotalElapsedTime() {
+        const totalElapsedTime = window.localStorage.getItem('totalElapsedTime');
+        if (totalElapsedTime) {
+            document.getElementById('timeDisplay').textContent = `Total Time: ${totalElapsedTime} seconds`;
+        }
+    }
+
+    function displayTotalScore() {
+        const totalScore = window.localStorage.getItem('totalScore');
+        if (totalScore) {
+            document.getElementById('totalScoreDisplay').textContent = `Total Score: ${totalScore}`;
+        }
+    }
+
+    function updateTotalScore(newScore) {
+        const totalScore = window.localStorage.getItem('totalScore') || 0;
+        const updatedTotalScore = parseInt(totalScore) + newScore;
+        window.localStorage.setItem('totalScore', updatedTotalScore);
+        document.getElementById('totalScoreDisplay').textContent = `Total Score: ${updatedTotalScore}`;
+    }
+
+    document.getElementById('saveScoreForm').onsubmit = function(event) {
+        event.preventDefault();
+        const playerName = document.getElementById('playerName').value.trim();
+        const totalElapsedTime = window.localStorage.getItem('totalElapsedTime');
+
+        if (playerName && totalElapsedTime && !isNaN(totalElapsedTime)) {
+            const score = {
+                name: playerName,
+                time: totalElapsedTime
+            };
+
+            try {
+                let scores = JSON.parse(window.localStorage.getItem('scores')) || [];
+                scores.push(score);
+                window.localStorage.setItem('scores', JSON.stringify(scores));
+                displayScores();
+
+                updateTotalScore(parseInt(totalElapsedTime));
+                swal({
+                    title: "Score Saved!",
+                    text: `Name: ${playerName}, Time: ${totalElapsedTime} seconds`,
+                    icon: "success",
+                    button: "OK",
+                }).then(() => {
+                    window.localStorage.removeItem('totalElapsedTime');
+                    window.localStorage.removeItem('currentLevel');
+                    window.location.href = "index.html";
+                });
+            } catch (e) {
+                swal({
+                    title: "Error",
+                    text: "Đã xảy ra lỗi khi lưu điểm. Vui lòng thử lại.",
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        } else {
+            swal({
+                title: "Error",
+                text: "Bạn vẫn chưa có điểm nào.",
+                icon: "error",
+                button: "OK",
+            });
+        }
+    };
+
+    function displayScores() {
+        const scoreTableBody = document.querySelector('#scoreTable tbody');
+        scoreTableBody.innerHTML = '';
+
+        const scores = JSON.parse(window.localStorage.getItem('scores')) || [];
+        scores.forEach(score => {
+            const row = document.createElement('tr');
+            const nameCell = document.createElement('td');
+            const timeCell = document.createElement('td');
+            nameCell.textContent = score.name;
+            timeCell.textContent = score.time;
+            row.appendChild(nameCell);
+            row.appendChild(timeCell);
+            scoreTableBody.appendChild(row);
+        });
+    }
+
+    document.getElementById('clearStorageButton').onclick = function() {
+        swal({
+            title: "Are you sure?",
+            text: "Sau khi xóa, bạn sẽ không thể khôi phục điểm số!",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+            .then((willDelete) => {
+                if (willDelete) {
+                    window.localStorage.clear();
+                    displayScores();
+                    document.getElementById('timeDisplay').textContent = '';
+                    document.getElementById('totalScoreDisplay').textContent = '';
+                    swal("Điểm của bạn đã được xoá toàn bộ!.", {
+                        icon: "success",
+                    });
+                } else {
+                    swal("Điểm của bạn chưa được xoá!.");
+                }
+            });
+    };
+</script>
+</body>
+</html>

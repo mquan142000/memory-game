@@ -33,6 +33,14 @@ h2 {
     text-shadow: 5px 5px 10px #267c65;
 }
 
+h4 {
+    font-size: 3em;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-shadow: 5px 5px 10px #267c65;
+}
+
 .reset {
     padding: 15px 20px;
     color: #267c65;

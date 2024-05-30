@@ -3,29 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Memory Game</title>
-    <link rel="stylesheet" href="level1.css">
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-
+    <link rel="stylesheet" href="level1.css">
 
 </head>
 <body>
 <div class="container">
     <h2>Memory Game</h2>
+    <h4>Level 1</h4>
     <div id="time">00:30</div>
     <div class="game"></div>
-    <button class="reset" onclick="initializeGame();">Reset game</button>
+    <button class="reset" onclick="resetGame();">Reset Game</button>
 </div>
 
 <script>
-    const emojis = ['🦊', '🦊', '🐰', '🐰'];
-    let starTime, timer;
+    window.localStorage.setItem('mygame', 'memory-game');
+    const emojis = ['🦊', '🦊', '🐶', '🐶'];
+    let startTime, timer;
+    let totalElapsedTime = window.localStorage.getItem('totalElapsedTime') ? parseInt(window.localStorage.getItem('totalElapsedTime')) : 0;
+    let currentLevel = window.localStorage.getItem('currentLevel') ? parseInt(window.localStorage.getItem('currentLevel')) : 1;
 
     function startTimer(duration, display) {
-        starTime = Date.now();
+        startTime = Date.now();
         let timer = duration, minutes, seconds;
         const interval = setInterval(function () {
-            minutes = parseInt(timer / 60, 10);
-            seconds = parseInt(timer % 60, 10);
+            minutes = Math.floor(timer / 60);
+            seconds = timer % 60;
 
             minutes = minutes < 10 ? "0" + minutes : minutes;
             seconds = seconds < 10 ? "0" + seconds : seconds;
@@ -52,65 +55,91 @@
         if (timer) {
             clearInterval(timer);
         }
-        const shuffledEmojis = emojis.sort(() => (Math.random() > 0.5) ? 1 : -1);
+
+        const shuffledEmojis = emojis.sort(() => Math.random() - 0.5);
         const gameContainer = document.querySelector('.game');
         gameContainer.innerHTML = '';
 
-        for (let i = 0; i < shuffledEmojis.length; i++) {
-            let box = document.createElement('div');
+        shuffledEmojis.forEach(emoji => {
+            const box = document.createElement('div');
             box.className = 'item';
-            box.innerHTML = '<span class="emoji">' + shuffledEmojis[i] + '</span>'
+            box.innerHTML = '<span class="emoji">' + emoji + '</span>';
             box.querySelector('.emoji').style.visibility = 'hidden';
 
             box.onclick = function () {
                 const emoji = this.querySelector('.emoji');
                 emoji.style.visibility = 'visible';
                 this.classList.add('boxOpen');
-                setTimeout(function () {
+
+                setTimeout(() => {
                     const openBoxes = document.querySelectorAll('.boxOpen');
                     if (openBoxes.length === 2) {
                         if (openBoxes[0].querySelector('.emoji').innerHTML === openBoxes[1].querySelector('.emoji').innerHTML) {
-                            openBoxes[0].classList.add('boxMatch');
-                            openBoxes[1].classList.add('boxMatch');
-
-                            openBoxes[0].classList.remove('boxOpen');
-                            openBoxes[1].classList.remove('boxOpen');
+                            openBoxes.forEach(box => {
+                                box.classList.add('boxMatch');
+                                box.classList.remove('boxOpen');
+                            });
 
                             if (document.querySelectorAll('.boxMatch').length === shuffledEmojis.length) {
                                 clearInterval(timer);
-                                const elapsedTime = Math.round((Date.now() - starTime) / 1000);
-                                swal({
-                                    title: "You win!",
-                                    text: `You completed the game in ${elapsedTime} second. Do you want to increase the level up?`,
-                                    icon: "success",
-                                    buttons: {
-                                        cancel: "No",
-                                        confirm: "Yes",
-                                    },
-                                })
-                                    .then((willIncreaseLevel) => {
+                                const elapsedTime = Math.round((Date.now() - startTime) / 1000);
+                                totalElapsedTime += elapsedTime;
+                                window.localStorage.setItem('totalElapsedTime', totalElapsedTime);
+
+                                if (currentLevel < 2) {
+                                    swal({
+                                        title: "You win!",
+                                        text: `You completed level ${currentLevel} in ${elapsedTime} seconds. Proceed to the next level?`,
+                                        icon: "success",
+                                        buttons: {
+                                            cancel: "No",
+                                            confirm: "Yes",
+                                        },
+                                    }).then((willIncreaseLevel) => {
                                         if (willIncreaseLevel) {
-                                            window.location.href = 'level2.html';
+                                            currentLevel++;
+                                            window.localStorage.setItem('currentLevel', currentLevel);
+                                            window.location.href = "level2.html"
+                                            initializeGame();
                                         } else {
-                                            swal("You win!!");
+                                            swal("Total time: " + totalElapsedTime + " seconds");
+                                            window.location.href = "score.html";
                                         }
                                     });
+                                } else {
+                                    swal({
+                                        title: "You win!",
+                                        text: `You completed all levels in a total of ${totalElapsedTime} seconds.`,
+                                        icon: "success",
+                                        button: "Enter your name",
+                                    }).then(() => {
+                                        window.location.href = "level2.html.html";
+                                    });
+                                }
                             }
                         } else {
-                            openBoxes[0].querySelector('.emoji').style.visibility = 'hidden';
-                            openBoxes[1].querySelector('.emoji').style.visibility = 'hidden';
-                            openBoxes[0].classList.remove('boxOpen');
-                            openBoxes[1].classList.remove('boxOpen');
+                            openBoxes.forEach(box => {
+                                box.querySelector('.emoji').style.visibility = 'hidden';
+                                box.classList.remove('boxOpen');
+                            });
                         }
                     }
                 }, 500);
             };
             gameContainer.appendChild(box);
-        }
+        });
 
         const thirtySeconds = 30,
             display = document.querySelector('#time');
         timer = startTimer(thirtySeconds, display);
+    }
+
+    function resetGame() {
+        currentLevel = 1;
+        totalElapsedTime = 0;
+        window.localStorage.removeItem('totalElapsedTime');
+        window.localStorage.removeItem('currentLevel');
+        initializeGame();
     }
 
     initializeGame();
